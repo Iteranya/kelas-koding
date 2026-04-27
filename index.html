@@ -16,7 +16,6 @@
 </head>
 <body class="bg-gray-900 text-gray-300 h-screen w-screen overflow-hidden">
 
-    <!-- MAIN APP COMPONENT -->
     <div 
         x-data="editorApp()" 
         x-cloak
@@ -26,38 +25,91 @@
     >
 
         <!-- ========================================== -->
-        <!-- VIEW 1: REGISTRATION FORM                  -->
+        <!-- VIEW 1: AUTHENTICATION (REGISTER / LOGIN)  -->
         <!-- ========================================== -->
-        <div x-show="view === 'form'" class="flex-1 flex items-center justify-center bg-gray-900 p-4">
+        <div x-show="view === 'auth'" x-transition class="flex-1 flex items-center justify-center bg-gray-900 p-4">
             <div class="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700 w-full max-w-md">
-                <div class="mb-8 text-center">
+                
+                <div class="mb-6 text-center">
                     <h1 class="text-3xl font-bold text-white tracking-wide">
                         <i class="ri-code-s-slash-line text-blue-500 mr-1"></i>Web<span class="text-blue-500">Editor</span>
                     </h1>
-                    <p class="text-gray-400 mt-2">Enter your details to start coding.</p>
                 </div>
 
-                <form @submit.prevent="startSession" class="space-y-5">
+                <!-- Tabs -->
+                <div class="flex border-b border-gray-700 mb-6">
+                    <button @click="authMode = 'register'" 
+                            class="flex-1 py-2 font-medium text-sm transition-colors"
+                            :class="authMode === 'register' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-400 hover:text-gray-200'">
+                        New Student
+                    </button>
+                    <button @click="authMode = 'login'" 
+                            class="flex-1 py-2 font-medium text-sm transition-colors"
+                            :class="authMode === 'login' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-400 hover:text-gray-200'">
+                        Continuing Work
+                    </button>
+                </div>
+
+                <!-- REGISTER FORM -->
+                <form x-show="authMode === 'register'" @submit.prevent="register" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-400 mb-1">Full Name</label>
                         <input x-model="student.name" type="text" required placeholder="e.g. John Doe" 
-                            class="w-full bg-gray-900 border border-gray-600 text-white rounded px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                            class="w-full bg-gray-900 border border-gray-600 text-white rounded px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-400 mb-1">Class / Group</label>
                         <input x-model="student.class" type="text" required placeholder="e.g. 10A" 
-                            class="w-full bg-gray-900 border border-gray-600 text-white rounded px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors">
+                            class="w-full bg-gray-900 border border-gray-600 text-white rounded px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1">
                     </div>
-                    <button type="submit" 
-                        class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded transition-colors shadow-lg shadow-blue-900/20 mt-4">
-                        Start Coding
+                    <button type="submit" :disabled="isProcessing"
+                        class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded transition-colors shadow-lg mt-2 disabled:opacity-50">
+                        <span x-show="!isProcessing">Register & Start</span>
+                        <span x-show="isProcessing">Connecting...</span>
                     </button>
                 </form>
+
+                <!-- LOGIN FORM -->
+                <form x-show="authMode === 'login'" @submit.prevent="login" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Your Secret ID (Password)</label>
+                        <input x-model="loginId" type="text" required placeholder="Paste your ID here..." 
+                            class="w-full bg-gray-900 border border-gray-600 text-white rounded px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 font-mono text-center tracking-widest">
+                    </div>
+                    <button type="submit" :disabled="isProcessing"
+                        class="w-full bg-green-600 hover:bg-green-500 text-white font-medium py-2.5 rounded transition-colors shadow-lg mt-2 disabled:opacity-50">
+                        <span x-show="!isProcessing">Login</span>
+                        <span x-show="isProcessing">Loading Work...</span>
+                    </button>
+                </form>
+
             </div>
         </div>
 
         <!-- ========================================== -->
-        <!-- VIEW 2: EDITOR WORKSPACE                   -->
+        <!-- VIEW 2: SHOW SECRET ID (AFTER REGISTER)    -->
+        <!-- ========================================== -->
+        <div x-show="view === 'show_id'" x-transition class="flex-1 flex items-center justify-center bg-gray-900 p-4">
+            <div class="bg-gray-800 p-8 rounded-xl shadow-2xl border border-blue-500/50 w-full max-w-md text-center">
+                <div class="w-16 h-16 bg-blue-500/20 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="ri-key-2-fill text-3xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Registration Successful!</h2>
+                <p class="text-gray-400 mb-6 text-sm">Please save this ID. It is your password to continue your work from home or another computer.</p>
+                
+                <div class="bg-gray-900 p-4 rounded-lg border border-gray-700 flex items-center justify-between mb-8 group hover:border-blue-500 transition-colors cursor-pointer" @click="copyId">
+                    <span x-text="pbRecordId" class="font-mono text-xl text-white tracking-wider select-all"></span>
+                    <i class="ri-clipboard-line text-gray-400 group-hover:text-blue-500"></i>
+                </div>
+
+                <button @click="continueToEditor" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 rounded transition-colors shadow-lg">
+                    I have saved my ID, let's code!
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 3: EDITOR WORKSPACE                   -->
         <!-- ========================================== -->
         <div x-show="view === 'editor'" class="flex flex-col h-full w-full">
             
@@ -66,16 +118,20 @@
                 <!-- Left: Title & Info -->
                 <div class="flex items-center gap-4">
                     <div class="font-bold text-white tracking-wide flex items-center">
-                        <i class="ri-code-s-slash-line text-blue-500 mr-1"></i>
-                        Web<span class="text-blue-500">Editor</span>
+                        <i class="ri-code-s-slash-line text-blue-500 mr-1"></i>Web<span class="text-blue-500">Editor</span>
                     </div>
                     <div class="h-4 w-px bg-gray-600"></div>
-                    <div class="text-xs text-gray-400">
-                        <span x-text="student.name" class="text-white font-medium"></span> 
-                        (<span x-text="student.class" class="text-blue-400"></span>)
+                    <div class="text-xs text-gray-400 flex flex-col justify-center">
+                        <div>
+                            <span x-text="student.name" class="text-white font-medium"></span> 
+                            (<span x-text="student.class" class="text-blue-400"></span>)
+                        </div>
+                        <div class="font-mono text-[10px] opacity-50 cursor-pointer hover:opacity-100 transition-opacity" @click="copyId" title="Click to copy ID">
+                            ID: <span x-text="pbRecordId"></span>
+                        </div>
                     </div>
-                    <button @click="logout" title="Change Student" class="text-gray-500 hover:text-red-400 text-xs transition-colors">
-                        <i class="ri-logout-box-r-line text-base"></i>
+                    <button @click="logout" title="Log Out" class="text-gray-500 hover:text-red-400 text-sm transition-colors ml-2 bg-gray-900/50 p-1.5 rounded">
+                        <i class="ri-logout-box-r-line"></i> Exit
                     </button>
                     
                     <div class="h-4 w-px bg-gray-600 hidden md:block"></div>
@@ -85,7 +141,7 @@
                                   'bg-green-500': statusText === 'Saved' || statusText === 'Deployed',
                                   'bg-yellow-500': isProcessing,
                                   'bg-gray-500': statusText === 'Ready',
-                                  'bg-red-500': statusText === 'Error'
+                                  'bg-red-500': statusText === 'Error' || statusText === 'Offline Mode'
                               }"></span>
                         <span x-text="statusText"></span>
                     </div>
@@ -98,7 +154,6 @@
                     </button>
                     <div class="h-4 w-px bg-gray-600"></div>
                     
-                    <!-- PocketBase Actions -->
                     <button @click="submitToPocketbase('draft')" :disabled="isProcessing" class="px-4 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-white rounded disabled:opacity-50 transition-colors">
                         Save Draft
                     </button>
@@ -110,18 +165,14 @@
 
             <!-- WORKSPACE -->
             <main x-ref="workspaceContainer" class="flex-1 flex overflow-hidden relative">
-                
-                <!-- CODE PANE -->
                 <div class="relative flex flex-col bg-gray-900" :style="`width: ${showPreview ? leftWidth : 100}%`">
                     <div x-ref="mainEditor" class="absolute inset-0 w-full h-full"></div>
                 </div>
 
-                <!-- DRAGGER -->
                 <div x-show="showPreview" @mousedown="startDrag($event)"
                     class="w-1 bg-gray-800 hover:bg-blue-500 cursor-col-resize z-50 flex items-center justify-center transition-colors group">
                 </div>
 
-                <!-- PREVIEW PANE -->
                 <div x-show="showPreview" class="flex-1 relative bg-white">
                     <div x-show="dragType" class="absolute inset-0 z-50 bg-transparent cursor-col-resize"></div>
                     <iframe x-ref="previewFrame" class="w-full h-full border-0"></iframe>
@@ -155,40 +206,38 @@
         import Alpine from 'https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/module.esm.js';
         import ace from 'https://esm.sh/ace-builds@1.32.7/src-min-noconflict/ace';
 
-        // ACE CONFIGURATION
         const ACE_CDN = "https://cdn.jsdelivr.net/npm/ace-builds@1.32.7/src-min-noconflict/";
         ace.config.set('basePath', ACE_CDN);
         ace.config.set('modePath', ACE_CDN);
         ace.config.set('themePath', ACE_CDN);
         ace.config.set('workerPath', ACE_CDN);
 
-        // POCKETBASE PLACEHOLDER ENDPOINT
-        // Replace this with your actual Pocketbase URL when ready
-        const POCKETBASE_URL = "https://pb-irc.artesparadox.net/api/collections/kelas_koding/records";
+        // --- POCKETBASE URL ---
+        // Change this to your live server URL when ready. 
+        const POCKETBASE_URL = "http://127.0.0.1:8090/api/collections/submissions/records";
 
         document.addEventListener('alpine:init', () => {
             
-            // 1. Setup Notifications Store
             Alpine.store('notifications', {
                 items: [],
                 add(note) {
                     const id = Date.now();
                     this.items.push({ id, ...note });
-                    setTimeout(() => {
-                        this.items = this.items.filter(n => n.id !== id);
-                    }, 3000);
+                    setTimeout(() => { this.items = this.items.filter(n => n.id !== id); }, 3000);
                 }
             });
 
-            // 2. Setup Main App Component
             Alpine.data('editorApp', () => ({
-                view: 'form', // 'form' | 'editor'
+                view: 'auth', // 'auth' | 'show_id' | 'editor'
+                authMode: 'register', // 'register' | 'login'
                 isProcessing: false,
                 statusText: 'Ready',
                 
-                // User State
+                // User & Server State
                 student: { name: '', class: '' },
-                pbRecordId: null, // Tracks if we should POST (new) or PATCH (update)
+                loginId: '', 
+                pbRecordId: null, 
+                loadedCode: null, // Holds code fetched from server
 
                 // Layout State
                 leftWidth: 50,
@@ -196,68 +245,128 @@
                 dragType: null,
                 editor: null,
 
-                defaultHTML: `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My First Page</title>
-    <script src="https://cdn.tailwindcss.com"><\/script>
-</head>
-<body class="p-10 bg-gray-100">
-    <h1 class="text-3xl font-bold text-blue-600">Hello World!</h1>
-    <p class="mt-2 text-gray-600">Start editing your code here.</p>
-</body>
-</html>`,
+                defaultHTML: `<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>My Web Page</title>\n    <script src="https://cdn.tailwindcss.com"><\/script>\n</head>\n<body class="p-10 bg-gray-100">\n    <h1 class="text-3xl font-bold text-blue-600">Hello World!</h1>\n    <p class="mt-2 text-gray-600">Start editing your code here.</p>\n</body>\n</html>`,
 
+                // -----------------------------------------
+                // STARTUP & AUTO-LOGIN
+                // -----------------------------------------
                 init() {
-                    // Check if student already exists in LocalStorage
-                    const savedName = localStorage.getItem('student_name');
-                    const savedClass = localStorage.getItem('student_class');
                     const savedRecordId = localStorage.getItem('pb_record_id');
-
-                    if (savedName && savedClass) {
-                        this.student.name = savedName;
-                        this.student.class = savedClass;
-                        if (savedRecordId) this.pbRecordId = savedRecordId;
-                        
-                        this.view = 'editor';
-                        this.initEditorEnv();
+                    if (savedRecordId) {
+                        this.loginId = savedRecordId;
+                        this.login(true); // Attempt auto-login in background
                     }
                 },
 
-                // ---- AUTH / SESSION LOGIC ----
-
-                startSession() {
+                // -----------------------------------------
+                // AUTH: REGISTER & LOGIN
+                // -----------------------------------------
+                async register() {
                     if (!this.student.name || !this.student.class) return;
-                    
-                    // Save to browser storage
-                    localStorage.setItem('student_name', this.student.name);
-                    localStorage.setItem('student_class', this.student.class);
-                    
+                    this.isProcessing = true;
+
+                    const payload = {
+                        name: this.student.name,
+                        class: this.student.class,
+                        html_draft: this.defaultHTML
+                    };
+
+                    try {
+                        const res = await fetch(POCKETBASE_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!res.ok) throw new Error("Failed to connect to server");
+                        
+                        const data = await res.json();
+                        this.pbRecordId = data.id;
+                        this.finishAuthFlow(true); // show ID screen
+                        
+                    } catch (error) {
+                        console.warn("PocketBase not found. Simulating registration for testing.");
+                        // FAKE LOCAL OFFLINE MODE (So you can test without PB running)
+                        this.pbRecordId = 'offline_' + Math.random().toString(36).substr(2, 9);
+                        localStorage.setItem('offline_mock_data_' + this.pbRecordId, JSON.stringify(payload));
+                        this.finishAuthFlow(true);
+                    } finally {
+                        this.isProcessing = false;
+                    }
+                },
+
+                async login(isAutoLogin = false) {
+                    if (!this.loginId) return;
+                    this.isProcessing = true;
+
+                    try {
+                        const res = await fetch(`${POCKETBASE_URL}/${this.loginId}`);
+                        if (!res.ok) throw new Error("ID not found on server");
+                        
+                        const data = await res.json();
+                        this.student.name = data.name;
+                        this.student.class = data.class;
+                        this.pbRecordId = data.id;
+                        this.loadedCode = data.html_draft;
+                        
+                        this.finishAuthFlow(false);
+
+                    } catch (error) {
+                        // OFFLINE FALLBACK LOGIC
+                        const mockDataStr = localStorage.getItem('offline_mock_data_' + this.loginId);
+                        if (mockDataStr) {
+                            const mockData = JSON.parse(mockDataStr);
+                            this.student.name = mockData.name;
+                            this.student.class = mockData.class;
+                            this.pbRecordId = this.loginId;
+                            this.loadedCode = mockData.html_draft;
+                            this.statusText = "Offline Mode";
+                            this.finishAuthFlow(false);
+                        } else {
+                            if (!isAutoLogin) {
+                                this.$store.notifications.add({ type: 'error', message: 'Invalid ID or Server Offline' });
+                            }
+                        }
+                    } finally {
+                        this.isProcessing = false;
+                    }
+                },
+
+                finishAuthFlow(isNew) {
+                    localStorage.setItem('pb_record_id', this.pbRecordId);
+                    if (isNew) {
+                        this.view = 'show_id';
+                    } else {
+                        this.continueToEditor();
+                    }
+                },
+
+                continueToEditor() {
                     this.view = 'editor';
-                    this.initEditorEnv();
+                    this.initEditorEnv(this.loadedCode || this.defaultHTML);
                 },
 
                 logout() {
-                    if(confirm("Are you sure? This will clear your current session data.")) {
-                        localStorage.clear();
+                    if(confirm("Log out? Make sure you have saved your ID!")) {
+                        localStorage.removeItem('pb_record_id');
                         this.student = { name: '', class: '' };
                         this.pbRecordId = null;
-                        this.view = 'form';
+                        this.loginId = '';
+                        this.view = 'auth';
                         if (this.editor) this.editor.destroy();
                     }
                 },
 
-                // ---- EDITOR LOGIC ----
+                async copyId() {
+                    await navigator.clipboard.writeText(this.pbRecordId);
+                    this.$store.notifications.add({ type: 'success', message: 'ID Copied to clipboard!' });
+                },
 
-                initEditorEnv() {
-                    // Wait for DOM to switch to Editor view before initializing Ace
+                // -----------------------------------------
+                // EDITOR LOGIC
+                // -----------------------------------------
+                initEditorEnv(initialContent) {
                     this.$nextTick(() => {
-                        // Recover local draft if it exists
-                        const savedDraft = localStorage.getItem('local_html_draft');
-                        const initialContent = savedDraft || this.defaultHTML;
-
                         this.editor = ace.edit(this.$refs.mainEditor);
                         this.editor.setTheme("ace/theme/tomorrow_night_eighties");
                         this.editor.session.setMode("ace/mode/html");
@@ -269,16 +378,16 @@
                             tabSize: 2,
                             showLineNumbers: true,
                         });
+                        
                         this.editor.setValue(initialContent, -1);
                         
-                        // Live Preview Update
                         this.editor.session.on('change', () => {
                             clearTimeout(this.previewTimeout);
                             this.previewTimeout = setTimeout(() => this.updatePreview(), 500);
                             
-                            // Continuously save to localstorage to prevent data loss on crash
-                            localStorage.setItem('local_html_draft', this.editor.getValue());
-                            this.statusText = 'Unsaved changes';
+                            if (this.statusText !== 'Offline Mode') {
+                                this.statusText = 'Unsaved changes';
+                            }
                         });
 
                         new ResizeObserver(() => this.editor.resize())
@@ -294,59 +403,27 @@
                     }
                 },
 
-                // ---- POCKETBASE INTEGRATION (PLACEHOLDER) ----
-
+                // -----------------------------------------
+                // POCKETBASE SAVING
+                // -----------------------------------------
                 async submitToPocketbase(actionType = 'draft') {
+                    if (!this.pbRecordId) return;
+
                     this.isProcessing = true;
                     this.statusText = actionType === 'deploy' ? 'Submitting...' : 'Saving...';
                     
                     const currentCode = this.editor.getValue();
-
-                    // Prepare payload matching your Pocketbase schema
-                    const payload = {
-                        name: this.student.name,
-                        class: this.student.class,
-                        html_draft: currentCode
-                    };
-
-                    // If deploying, update the main 'html' field as well
-                    if (actionType === 'deploy') {
-                        payload.html = currentCode;
-                    }
+                    const payload = { html_draft: currentCode };
+                    if (actionType === 'deploy') payload.html = currentCode;
 
                     try {
-                        let response;
-                        const headers = { 'Content-Type': 'application/json' };
+                        const res = await fetch(`${POCKETBASE_URL}/${this.pbRecordId}`, {
+                            method: 'PATCH', // Always update the existing record
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
 
-                        // If we already have a record ID, we PATCH to update it
-                        if (this.pbRecordId) {
-                            response = await fetch(`${POCKETBASE_URL}/${this.pbRecordId}`, {
-                                method: 'PATCH',
-                                headers: headers,
-                                body: JSON.stringify(payload)
-                            });
-                        } 
-                        // Otherwise, we POST to create a new record
-                        else {
-                            response = await fetch(POCKETBASE_URL, {
-                                method: 'POST',
-                                headers: headers,
-                                body: JSON.stringify(payload)
-                            });
-                        }
-
-                        if (!response.ok) {
-                            // Let it fail gracefully during testing since endpoint doesn't exist yet
-                            throw new Error(`HTTP Error: ${response.status}`); 
-                        }
-
-                        const data = await response.json();
-                        
-                        // Save the generated ID so future saves update the same record
-                        if (data.id) {
-                            this.pbRecordId = data.id;
-                            localStorage.setItem('pb_record_id', data.id);
-                        }
+                        if (!res.ok) throw new Error("Failed to save");
 
                         this.statusText = actionType === 'deploy' ? 'Deployed' : 'Saved';
                         this.$store.notifications.add({ 
@@ -355,26 +432,30 @@
                         });
 
                     } catch (error) {
-                        console.warn("Pocketbase Upload Error (Expected if endpoint isn't live):", error);
+                        // OFFLINE FALLBACK
+                        const mockStr = localStorage.getItem('offline_mock_data_' + this.pbRecordId);
+                        if (mockStr) {
+                            const mockData = JSON.parse(mockStr);
+                            mockData.html_draft = currentCode;
+                            localStorage.setItem('offline_mock_data_' + this.pbRecordId, JSON.stringify(mockData));
+                        }
                         
-                        // Fallback behavior since endpoint doesn't exist yet
-                        this.statusText = 'Local Save Only';
+                        this.statusText = 'Offline Mode';
                         this.$store.notifications.add({ 
                             type: 'warning', 
-                            message: 'Saved locally. (Server not connected)' 
+                            message: 'Saved locally. Server is offline.' 
                         });
                     } finally {
                         this.isProcessing = false;
                     }
                 },
 
-                // ---- LAYOUT / DRAGGING LOGIC ----
-
+                // -----------------------------------------
+                // LAYOUT & DRAG
+                // -----------------------------------------
                 togglePreview() {
                     this.showPreview = !this.showPreview;
-                    if (this.showPreview && this.leftWidth > 90) {
-                        this.leftWidth = 50;
-                    }
+                    if (this.showPreview && this.leftWidth > 90) this.leftWidth = 50;
                 },
 
                 startDrag(e) {
@@ -392,17 +473,14 @@
                     if (this.dragType !== 'horizontal') return;
                     const containerRect = this.$refs.workspaceContainer.getBoundingClientRect();
                     let newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
-                    
                     if (newWidth < 10) newWidth = 10;
                     if (newWidth > 90) newWidth = 90;
                     this.leftWidth = newWidth;
-                    
                     if(this.editor) this.editor.resize();
                 }
             }));
         });
 
-        // Initialize Alpine
         Alpine.start();
     </script>
 </body>
