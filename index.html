@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>School Web Editor</title>
-    
+
     <!-- CSS Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
@@ -16,10 +16,10 @@
 </head>
 <body class="bg-gray-900 text-gray-300 h-screen w-screen overflow-hidden">
 
-    <div 
-        x-data="editorApp()" 
+    <div
+        x-data="editorApp()"
         x-cloak
-        @mousemove.window="handleDrag" 
+        @mousemove.window="handleDrag"
         @mouseup.window="stopDrag"
         class="flex flex-col h-full w-full"
     >
@@ -29,7 +29,7 @@
         <!-- ========================================== -->
         <div x-show="view === 'auth'" x-transition class="flex-1 flex items-center justify-center bg-gray-900 p-4">
             <div class="bg-gray-800 p-8 rounded-xl shadow-2xl border border-gray-700 w-full max-w-md">
-                
+
                 <div class="mb-6 text-center">
                     <h1 class="text-3xl font-bold text-white tracking-wide">
                         <i class="ri-code-s-slash-line text-blue-500 mr-1"></i>Web<span class="text-blue-500">Editor</span>
@@ -38,12 +38,12 @@
 
                 <!-- Tabs -->
                 <div class="flex border-b border-gray-700 mb-6">
-                    <button @click="authMode = 'register'" 
+                    <button @click="authMode = 'register'"
                             class="flex-1 py-2 font-medium text-sm transition-colors"
                             :class="authMode === 'register' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-400 hover:text-gray-200'">
                         New Student
                     </button>
-                    <button @click="authMode = 'login'" 
+                    <button @click="authMode = 'login'"
                             class="flex-1 py-2 font-medium text-sm transition-colors"
                             :class="authMode === 'login' ? 'text-blue-500 border-b-2 border-blue-500' : 'text-gray-400 hover:text-gray-200'">
                         Continuing Work
@@ -54,12 +54,12 @@
                 <form x-show="authMode === 'register'" @submit.prevent="register" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-400 mb-1">Full Name</label>
-                        <input x-model="student.name" type="text" required placeholder="e.g. John Doe" 
+                        <input x-model="student.name" type="text" required placeholder="e.g. John Doe"
                             class="w-full bg-gray-900 border border-gray-600 text-white rounded px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-400 mb-1">Class / Group</label>
-                        <input x-model="student.class" type="text" required placeholder="e.g. 10A" 
+                        <input x-model="student.class" type="text" required placeholder="e.g. 10A"
                             class="w-full bg-gray-900 border border-gray-600 text-white rounded px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1">
                     </div>
                     <button type="submit" :disabled="isProcessing"
@@ -73,7 +73,7 @@
                 <form x-show="authMode === 'login'" @submit.prevent="login" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-400 mb-1">Your Secret ID (Password)</label>
-                        <input x-model="loginId" type="text" required placeholder="Paste your ID here..." 
+                        <input x-model="loginId" type="text" required placeholder="Paste your ID here..."
                             class="w-full bg-gray-900 border border-gray-600 text-white rounded px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 font-mono text-center tracking-widest">
                     </div>
                     <button type="submit" :disabled="isProcessing"
@@ -96,7 +96,7 @@
                 </div>
                 <h2 class="text-2xl font-bold text-white mb-2">Registration Successful!</h2>
                 <p class="text-gray-400 mb-6 text-sm">Please save this ID. It is your password to continue your work from home or another computer.</p>
-                
+
                 <div class="bg-gray-900 p-4 rounded-lg border border-gray-700 flex items-center justify-between mb-8 group hover:border-blue-500 transition-colors cursor-pointer" @click="copyId">
                     <span x-text="pbRecordId" class="font-mono text-xl text-white tracking-wider select-all"></span>
                     <i class="ri-clipboard-line text-gray-400 group-hover:text-blue-500"></i>
@@ -112,7 +112,7 @@
         <!-- VIEW 3: EDITOR WORKSPACE                   -->
         <!-- ========================================== -->
         <div x-show="view === 'editor'" class="flex flex-col h-full w-full">
-            
+
             <!-- TOOLBAR -->
             <header class="h-14 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 shrink-0">
                 <!-- Left: Title & Info -->
@@ -123,7 +123,7 @@
                     <div class="h-4 w-px bg-gray-600"></div>
                     <div class="text-xs text-gray-400 flex flex-col justify-center">
                         <div>
-                            <span x-text="student.name" class="text-white font-medium"></span> 
+                            <span x-text="student.name" class="text-white font-medium"></span>
                             (<span x-text="student.class" class="text-blue-400"></span>)
                         </div>
                         <div class="font-mono text-[10px] opacity-50 cursor-pointer hover:opacity-100 transition-opacity" @click="copyId" title="Click to copy ID">
@@ -133,10 +133,10 @@
                     <button @click="logout" title="Log Out" class="text-gray-500 hover:text-red-400 text-sm transition-colors ml-2 bg-gray-900/50 p-1.5 rounded">
                         <i class="ri-logout-box-r-line"></i> Exit
                     </button>
-                    
+
                     <div class="h-4 w-px bg-gray-600 hidden md:block"></div>
                     <div class="hidden md:flex items-center gap-2 text-xs font-mono bg-gray-900 px-3 py-1 rounded border border-gray-700">
-                        <span class="w-2 h-2 rounded-full" 
+                        <span class="w-2 h-2 rounded-full"
                               :class="{
                                   'bg-green-500': statusText === 'Saved' || statusText === 'Deployed',
                                   'bg-yellow-500': isProcessing,
@@ -153,7 +153,13 @@
                         <i class="ri-layout-column-line text-lg"></i>
                     </button>
                     <div class="h-4 w-px bg-gray-600"></div>
-                    
+
+                    <!-- ⭐ NEW: Reset to Default Button ⭐ -->
+                    <button @click="resetToDefault"
+                            class="px-4 py-1.5 text-sm bg-red-700 hover:bg-red-600 text-white rounded transition-colors flex items-center gap-2">
+                        <i class="ri-refresh-line"></i> Reset
+                    </button>
+
                     <button @click="submitToPocketbase('draft')" :disabled="isProcessing" class="px-4 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 text-white rounded disabled:opacity-50 transition-colors">
                         Save Draft
                     </button>
@@ -213,11 +219,10 @@
         ace.config.set('workerPath', ACE_CDN);
 
         // --- POCKETBASE URL ---
-        // Change this to your live server URL when ready. 
         const POCKETBASE_URL = "https://pb-irc.artesparadox.net/api/collections/kelas_koding/records";
 
         document.addEventListener('alpine:init', () => {
-            
+
             Alpine.store('notifications', {
                 items: [],
                 add(note) {
@@ -228,22 +233,22 @@
             });
 
             Alpine.data('editorApp', () => ({
-                view: 'auth', // 'auth' | 'show_id' | 'editor'
-                authMode: 'register', // 'register' | 'login'
+                view: 'auth',
+                authMode: 'register',
                 isProcessing: false,
                 statusText: 'Ready',
-                
-                // User & Server State
-                student: { name: '', class: '' },
-                loginId: '', 
-                pbRecordId: null, 
-                loadedCode: null, // Holds code fetched from server
 
-                // Layout State
+                student: { name: '', class: '' },
+                loginId: '',
+                pbRecordId: null,
+                loadedCode: null,
+
                 leftWidth: 50,
                 showPreview: true,
                 dragType: null,
                 editor: null,
+
+                previewTimeout: null,
 
                 defaultHTML: `<!DOCTYPE html>
 <html lang="en">
@@ -291,12 +296,27 @@
                     const savedRecordId = localStorage.getItem('pb_record_id');
                     if (savedRecordId) {
                         this.loginId = savedRecordId;
-                        this.login(true); // Attempt auto-login in background
+                        this.login(true);
                     }
                 },
 
                 // -----------------------------------------
-                // AUTH: REGISTER & LOGIN
+                // ⭐ NEW: RESET TO DEFAULT ⭐
+                // -----------------------------------------
+                resetToDefault() {
+                    if (confirm("⚠️ Are you sure you want to reset to the default template? All your current code will be lost!")) {
+                        this.editor.setValue(this.defaultHTML, -1);
+                        this.updatePreview();
+                        this.statusText = 'Reset to default';
+                        this.$store.notifications.add({
+                            type: 'warning',
+                            message: 'Code has been reset to the default template.'
+                        });
+                    }
+                },
+
+                // -----------------------------------------
+                // AUTH
                 // -----------------------------------------
                 async register() {
                     if (!this.student.name || !this.student.class) return;
@@ -316,14 +336,13 @@
                         });
 
                         if (!res.ok) throw new Error("Failed to connect to server");
-                        
+
                         const data = await res.json();
                         this.pbRecordId = data.id;
-                        this.finishAuthFlow(true); // show ID screen
-                        
+                        this.finishAuthFlow(true);
+
                     } catch (error) {
                         console.warn("PocketBase not found. Simulating registration for testing.");
-                        // FAKE LOCAL OFFLINE MODE (So you can test without PB running)
                         this.pbRecordId = 'offline_' + Math.random().toString(36).substr(2, 9);
                         localStorage.setItem('offline_mock_data_' + this.pbRecordId, JSON.stringify(payload));
                         this.finishAuthFlow(true);
@@ -339,17 +358,16 @@
                     try {
                         const res = await fetch(`${POCKETBASE_URL}/${this.loginId}`);
                         if (!res.ok) throw new Error("ID not found on server");
-                        
+
                         const data = await res.json();
                         this.student.name = data.name;
                         this.student.class = data.class;
                         this.pbRecordId = data.id;
                         this.loadedCode = data.html_draft;
-                        
+
                         this.finishAuthFlow(false);
 
                     } catch (error) {
-                        // OFFLINE FALLBACK LOGIC
                         const mockDataStr = localStorage.getItem('offline_mock_data_' + this.loginId);
                         if (mockDataStr) {
                             const mockData = JSON.parse(mockDataStr);
@@ -415,13 +433,13 @@
                             tabSize: 2,
                             showLineNumbers: true,
                         });
-                        
+
                         this.editor.setValue(initialContent, -1);
-                        
+
                         this.editor.session.on('change', () => {
                             clearTimeout(this.previewTimeout);
                             this.previewTimeout = setTimeout(() => this.updatePreview(), 500);
-                            
+
                             if (this.statusText !== 'Offline Mode') {
                                 this.statusText = 'Unsaved changes';
                             }
@@ -448,14 +466,14 @@
 
                     this.isProcessing = true;
                     this.statusText = actionType === 'deploy' ? 'Submitting...' : 'Saving...';
-                    
+
                     const currentCode = this.editor.getValue();
                     const payload = { html_draft: currentCode };
                     if (actionType === 'deploy') payload.html = currentCode;
 
                     try {
                         const res = await fetch(`${POCKETBASE_URL}/${this.pbRecordId}`, {
-                            method: 'PATCH', // Always update the existing record
+                            method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(payload)
                         });
@@ -463,24 +481,23 @@
                         if (!res.ok) throw new Error("Failed to save");
 
                         this.statusText = actionType === 'deploy' ? 'Deployed' : 'Saved';
-                        this.$store.notifications.add({ 
-                            type: 'success', 
-                            message: actionType === 'deploy' ? 'Final code submitted!' : 'Draft saved to server.' 
+                        this.$store.notifications.add({
+                            type: 'success',
+                            message: actionType === 'deploy' ? 'Final code submitted!' : 'Draft saved to server.'
                         });
 
                     } catch (error) {
-                        // OFFLINE FALLBACK
                         const mockStr = localStorage.getItem('offline_mock_data_' + this.pbRecordId);
                         if (mockStr) {
                             const mockData = JSON.parse(mockStr);
                             mockData.html_draft = currentCode;
                             localStorage.setItem('offline_mock_data_' + this.pbRecordId, JSON.stringify(mockData));
                         }
-                        
+
                         this.statusText = 'Offline Mode';
-                        this.$store.notifications.add({ 
-                            type: 'warning', 
-                            message: 'Saved locally. Server is offline.' 
+                        this.$store.notifications.add({
+                            type: 'warning',
+                            message: 'Saved locally. Server is offline.'
                         });
                     } finally {
                         this.isProcessing = false;
@@ -498,7 +515,7 @@
                 startDrag(e) {
                     this.dragType = 'horizontal';
                     document.body.style.cursor = 'col-resize';
-                    e.preventDefault(); 
+                    e.preventDefault();
                 },
 
                 stopDrag() {
